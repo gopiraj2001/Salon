@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Salon Admin Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+    body {
+      background: #f4f6f9;
+      font-family: Arial, sans-serif;
+    }
+
+    .navbar {
+      background: #222;
+    }
+
+    .navbar-brand {
+      color: #f5a422 !important;
+      font-weight: bold;
+    }
+
+    h2 {
+      text-align: center;
+      margin: 30px 0;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .card {
+      border: none;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    table {
+      background: #fff;
+    }
+
+    th {
+      background: #f5a422;
+      color: #fff;
+      text-transform: uppercase;
+      font-size: 14px;
+    }
+
+    td {
+      font-size: 14px;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- NAVBAR -->
+  <nav class="navbar navbar-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">💈 Salon Admin</a>
+      <a href="adminLogin.html" class="btn btn-warning btn-sm text-white">Logout</a>
+    </div>
+  </nav>
+
+  <!-- MAIN CONTENT -->
+  <div class="container my-4">
+    <div class="card p-3">
+      <h2>📋 Appointments</h2>
+      <div class="d-flex justify-content-end mb-2">
+        <button class="btn btn-danger btn-sm" onclick="deleteAllAppointments()">🗑 Delete All</button>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-bordered table-hover align-middle text-center">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Customer</th>
+              <th>Contact</th>
+              <th>Email</th>
+              <th>Category</th>
+              <th>Date</th>
+              <th>Time</th>
+              <th>Message</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="appointmentsTable"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- JS -->
+  <script>
+    const API_URL = "http://localhost:5000";
+
+    // Fetch appointments
+    async function loadAppointments() {
+      try {
+        const res = await fetch(`${API_URL}/admin/appointments`);
+        const data = await res.json();
+
+        const tbody = document.getElementById("appointmentsTable");
+        tbody.innerHTML = "";
+        data.forEach(appt => {
+          const row = `
+            <tr>
+              <td>${appt.id}</td>
+              <td>${appt.customer_name}</td>
+              <td>${appt.customer_contact}</td>
+              <td>${appt.customer_email}</td>
+              <td>${appt.category}</td>
+              <td>${appt.appointment_date}</td>
+              <td>${appt.appointment_time}</td>
+              <td>${appt.message || ""}</td>
+              <td>
+                <button class="btn btn-danger btn-sm" onclick="deleteAppointment(${appt.id})">Delete</button>
+              </td>
+            </tr>
+          `;
+          tbody.innerHTML += row;
+        });
+      } catch (err) {
+        console.error("Error loading appointments:", err);
+      }
+    }
+
+    // Delete single appointment
+    async function deleteAppointment(id) {
+      if (!confirm("Are you sure you want to delete this appointment?")) return;
+      const res = await fetch(`${API_URL}/admin/appointments/${id}`, { method: "DELETE" });
+      const result = await res.json();
+      alert(result.message);
+      loadAppointments();
+    }
+
+    // Delete all appointments
+    async function deleteAllAppointments() {
+      if (!confirm("⚠ This will delete ALL appointments. Continue?")) return;
+      const res = await fetch(`${API_URL}/admin/appointments`, { method: "DELETE" });
+      const result = await res.json();
+      alert(result.message);
+      loadAppointments();
+    }
+
+    // Load on page start
+    loadAppointments();
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
