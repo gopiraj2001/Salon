@@ -205,29 +205,3 @@ if (data.availableSlots.length > 0) {
 }
 
 
-import mysql from "mysql2/promise";
-
-export default async function handler(req, res) {
-  try {
-    const connection = await mysql.createConnection({
-      host: process.env.DB_HOST,
-      user: process.env.DB_USER,
-      password: process.env.DB_PASS,
-      database: process.env.DB_NAME,
-    });
-
-    if (req.method === "POST") {
-      const { name, phone, service } = req.body;
-      await connection.execute(
-        "INSERT INTO bookings (name, phone, service) VALUES (?, ?, ?)",
-        [name, phone, service]
-      );
-      res.status(200).json({ message: "Booking saved" });
-    } else {
-      res.status(405).json({ message: "Method not allowed" });
-    }
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-}
-
